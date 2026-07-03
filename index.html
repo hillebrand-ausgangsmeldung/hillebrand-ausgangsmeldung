@@ -106,6 +106,7 @@ if(!raw){
         <tr><td class="lbl">Kunde</td><td>${escHtml(data.k||'')}</td></tr>
         <tr><td class="lbl">Material</td><td>${escHtml(data.m||'')}</td></tr>
         <tr><td class="lbl">Lieferschein-Nr.</td><td>${escHtml(data.l||'')}</td></tr>
+        ${data.f?`<tr><td class="lbl">Farbmarkierung</td><td>${escHtml(data.f)}</td></tr>`:''}
         <tr><td class="lbl">Chargen-Nr.</td><td>${chargeLines}</td></tr>
       </table>
       <div class="weights">
@@ -191,6 +192,7 @@ if(!raw){
         </div>
         <table class="ag-info">
           <tr><td class="ag-lbl">Kunde:</td><td class="ag-val ag-bold">${escHtml(data.k||'')}</td><td colspan="2">${data.l?'Lieferschein-Nr.: '+escHtml(data.l):''}</td></tr>
+          <tr><td class="ag-lbl"></td><td></td><td colspan="2">${data.f?'Farbmarkierung: '+escHtml(data.f):''}</td></tr>
           <tr><td class="ag-lbl">Legierung:</td><td class="ag-val">${escHtml(data.m||'')}</td><td colspan="2">Bl&ouml;cke</td></tr>
           <tr><td class="ag-lbl">Chargen-Nr:</td><td class="ag-val" colspan="3">${chargeLines}</td></tr>
         </table>
