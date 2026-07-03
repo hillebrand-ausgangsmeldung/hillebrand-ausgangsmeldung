@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ausgangsmeldung</title>
+<style>
+  *{box-sizing:border-box}
+  body{font-family:Verdana,Arial,sans-serif;color:#000;margin:0;background:#f0f4f8;padding:16px}
+  .card{background:#fff;border-radius:10px;box-shadow:0 2px 12px rgba(0,0,0,.10);padding:20px;max-width:520px;margin:0 auto}
+  h1{font-size:1.25em;margin:0 0 4px}
+  .sub{color:#666;font-size:.85em;margin-bottom:16px}
+  table.info{width:100%;border-collapse:collapse;margin-bottom:16px;font-size:.95em}
+  table.info td{padding:5px 4px;border-bottom:1px solid #eee;vertical-align:top}
+  table.info td.lbl{width:38%;color:#555;font-weight:bold}
+  .weights{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:16px}
+  .weights div{background:#f5f5f5;border-radius:6px;padding:8px;text-align:center}
+  .weights .val{font-size:1.2em;font-weight:bold}
+  .weights .lbl{font-size:.75em;color:#777}
+  .field{margin-bottom:14px}
+  .field label{display:block;font-size:.8em;font-weight:bold;color:#555;margin-bottom:4px;text-transform:uppercase;letter-spacing:.03em}
+  .field input[type=text],.field input[type=date]{width:100%;border:1.5px solid #ddd;border-radius:7px;padding:10px 11px;font-size:1em;font-family:Verdana,Arial,sans-serif}
+  .radiorow{display:flex;gap:20px;font-size:1em}
+  .radiorow label{display:flex;align-items:center;gap:5px;font-weight:normal;text-transform:none}
+  .sigcanvas{border:1.5px solid #ddd;border-radius:7px;width:100%;height:140px;touch-action:none;background:#fff;display:block}
+  .sigclear{margin-top:6px;font-size:.85em;padding:7px 14px;border:1px solid #999;border-radius:6px;background:#fff}
+  button.primary{background:#1a1a1a;color:#fff;border:none;border-radius:8px;padding:14px;font-size:1em;width:100%;margin-top:10px;cursor:pointer}
+  .error{background:#c0392b;color:#fff;padding:8px 12px;border-radius:6px;font-size:.85em;margin-top:10px;display:none}
+  .done{color:#2e7d32;font-size:.85em;margin-top:10px;display:none}
+  .missing{background:#c0392b;color:#fff;padding:16px;border-radius:8px;max-width:520px;margin:40px auto;font-size:.95em}
+
+  @media print{
+    body{background:#fff;padding:0}
+    .no-print{display:none!important}
+    .card{box-shadow:none;padding:0;max-width:none}
+    .field input,.sigcanvas{border-color:#000}
+  }
+</style>
+</head>
+<body>
+<div id="root"></div>
+
+<script>
+function b64ToJson(b64){
+  return JSON.parse(decodeURIComponent(escape(atob(b64))));
+}
+function escHtml(s){return String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+function fmtDE(n){return Number(n).toLocaleString('de-DE');}
+function todayISO(){const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
+
+const params=new URLSearchParams(location.search);
+const raw=params.get('d');
+const root=document.getElementById('root');
+
+if(!raw){
+  root.innerHTML='<div class="missing">Kein Auftrag gefunden. Dieser Link braucht Auftragsdaten im Link selbst. Bitte den QR-Code auf dem Kommissionierschein erneut scannen.</div>';
+}else{
+  let data;
+  try{ data=b64ToJson(raw); }
+  catch(e){ root.innerHTML='<div class="missing">Link ist beschaedigt oder unvollstaendig. Bitte den QR-Code erneut scannen.</div>'; data=null; }
+
+  if(data){
+    const chargeLines=(data.c||[]).map(c=>escHtml(c)).join(', ');
+    root.innerHTML=`
+    <div class="card">
+      <h1>Ausgangsmeldung</h1>
+      <div class="sub">Franz Hillebrand KG &ndash; digital ausfuellen und signieren</div>
+      <table class="info">
+        <tr><td class="lbl">Kunde</td><td>${escHtml(data.k||'')}</td></tr>
+        <tr><td class="lbl">Material</td><td>${escHtml(data.m||'')}</td></tr>
+        <tr><td class="lbl">Lieferschein-Nr.</td><td>${escHtml(data.l||'')}</td></tr>
+        <tr><td class="lbl">Chargen-Nr.</td><td>${chargeLines}</td></tr>
+      </table>
+      <div class="weights">
+        <div><div class="val">${fmtDE(data.b||0)}</div><div class="lbl">Brutto kg</div></div>
+        <div><div class="val">${fmtDE(data.t||0)}</div><div class="lbl">Tara kg</div></div>
+        <div><div class="val">${fmtDE(data.n||0)}</div><div class="lbl">Netto kg</div></div>
+      </div>
+
+      <div class="field">
+        <label>Verladedatum</label>
+        <input type="date" id="fVerladedatum" value="${todayISO()}">
+      </div>
+      <div class="field">
+        <label>Kennzeichen</label>
+        <input type="text" id="fKennzeichen" placeholder="z. B. SI-AB 123">
+      </div>
+      <div class="field">
+        <label>Endpruefung durchgefuehrt</label>
+        <div class="radiorow">
+          <label><input type="radio" name="fEndpruefung" value="ja"> Ja</label>
+          <label><input type="radio" name="fEndpruefung" value="nein"> Nein</label>
+        </div>
+      </div>
+      <div class="field">
+        <label>Bestaetigung Verlader (Kuerzel)</label>
+        <canvas id="sigCanvas" class="sigcanvas"></canvas>
+        <button type="button" class="sigclear no-print" id="btnClear">Loeschen</button>
+      </div>
+
+      <div class="error" id="errBox"></div>
+      <div class="done" id="doneBox">Fertig. Im Druckdialog "Als PDF speichern" waehlen, danach die Datei ueber die Nextcloud App hochladen.</div>
+      <button class="primary no-print" id="btnSubmit">Fertig &ndash; PDF erstellen</button>
+    </div>`;
+
+    const canvas=document.getElementById('sigCanvas');
+    function sizeCanvas(){
+      const rect=canvas.getBoundingClientRect();
+      canvas.width=rect.width*2;
+      canvas.height=rect.height*2;
+      const ctx=canvas.getContext('2d');
+      ctx.scale(2,2);
+      ctx.lineWidth=2.2;ctx.lineCap='round';ctx.strokeStyle='#000';
+    }
+    sizeCanvas();
+    canvas.dataset.signed='0';
+    let drawing=false,last=null;
+    function pos(e){
+      const rect=canvas.getBoundingClientRect();
+      const cx=(e.touches?e.touches[0].clientX:e.clientX);
+      const cy=(e.touches?e.touches[0].clientY:e.clientY);
+      return {x:cx-rect.left,y:cy-rect.top};
+    }
+    function start(e){drawing=true;last=pos(e);e.preventDefault();}
+    function move(e){
+      if(!drawing)return;
+      const ctx=canvas.getContext('2d');
+      const p=pos(e);
+      ctx.beginPath();ctx.moveTo(last.x,last.y);ctx.lineTo(p.x,p.y);ctx.stroke();
+      last=p;canvas.dataset.signed='1';e.preventDefault();
+    }
+    function end(){drawing=false;}
+    canvas.addEventListener('mousedown',start);
+    canvas.addEventListener('mousemove',move);
+    window.addEventListener('mouseup',end);
+    canvas.addEventListener('touchstart',start,{passive:false});
+    canvas.addEventListener('touchmove',move,{passive:false});
+    canvas.addEventListener('touchend',end);
+
+    document.getElementById('btnClear').addEventListener('click',()=>{
+      const ctx=canvas.getContext('2d');
+      ctx.clearRect(0,0,canvas.width,canvas.height);
+      canvas.dataset.signed='0';
+    });
+
+    document.getElementById('btnSubmit').addEventListener('click',()=>{
+      const datum=document.getElementById('fVerladedatum');
+      const kennz=document.getElementById('fKennzeichen');
+      const endpr=document.querySelector('input[name="fEndpruefung"]:checked');
+      const errBox=document.getElementById('errBox');
+      const missing=[];
+      if(!datum.value)missing.push('Verladedatum');
+      if(!kennz.value.trim())missing.push('Kennzeichen');
+      if(!endpr)missing.push('Endpruefung ja/nein');
+      if(canvas.dataset.signed!=='1')missing.push('Kuerzel');
+      if(missing.length){
+        errBox.textContent='Bitte ausfuellen: '+missing.join(', ');
+        errBox.style.display='block';
+        return;
+      }
+      errBox.style.display='none';
+      document.getElementById('doneBox').style.display='block';
+      window.print();
+    });
+  }
+}
+</script>
+</body>
+</html>
