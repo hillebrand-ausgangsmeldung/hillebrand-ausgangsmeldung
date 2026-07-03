@@ -30,8 +30,9 @@
   .missing{background:#c0392b;color:#fff;padding:16px;border-radius:8px;max-width:520px;margin:40px auto;font-size:.95em}
 
   /* Originales Ausgangsmeldung Formular FO-07-06, nur fuer den Druck */
-  #printLayout{display:none}
-  .ag-page{width:210mm;min-height:297mm;padding:15mm;margin:0 auto;background:#fff}
+  #printLayout{position:absolute;left:-99999px;top:0}
+  .ag-page{width:210mm;height:297mm;padding:15mm;margin:0 auto;background:#fff;position:relative;overflow:hidden}
+  .ag-inner{width:100%}
   .ag-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12mm}
   .ag-qm{font-size:13pt;line-height:1.6}
   .ag-formular{font-size:11pt;display:inline-block;border-top:1px solid #000;padding-top:1mm;margin-top:1mm}
@@ -46,16 +47,13 @@
   .ag-fields div{margin-bottom:9mm;font-size:13pt;color:#000}
   .ag-signimg{display:block;height:20mm;margin-top:2mm}
   .ag-signline{display:inline-block;width:50mm;border-bottom:1px solid #000;margin-left:2mm}
-  .ag-footbox{border:1px solid #000;display:flex;justify-content:space-between;padding:2mm 4mm;font-size:9pt;color:#000;margin-top:12mm}
+  .ag-footbox{position:absolute;bottom:15mm;left:15mm;right:15mm;border:1px solid #000;display:flex;justify-content:space-between;padding:2mm 4mm;font-size:9pt;color:#000}
 
-  @media screen{
-    #printLayout{display:none}
-  }
   @media print{
-    body{background:#fff;padding:0}
+    html,body{background:#fff;padding:0;margin:0}
     .no-print{display:none!important}
     #onScreen{display:none!important}
-    #printLayout{display:block}
+    #printLayout{position:static;left:auto}
     @page{size:A4;margin:0}
   }
 </style>
@@ -186,6 +184,7 @@ if(!raw){
       const paletten=(data.p!=null)?data.p:'';
       return `
       <div class="ag-page">
+       <div class="ag-inner">
         <div class="ag-header">
           <div class="ag-qm">Qualit&auml;tsmanagement<br>Handbuch<br><span class="ag-formular">Formular&nbsp;&nbsp;&nbsp;FO-07 &ndash; 06 Januar 2016</span><br>Ausgangsmeldung</div>
           <div><img class="ag-logo" src="data:image/jpeg;base64,${LOGO_B64}"></div>
@@ -209,6 +208,7 @@ if(!raw){
           <div>Warenversand erfolgt</div>
           <div>Best&auml;tigung Verlader (K&uuml;rzel):<br><img class="ag-signimg" src="${sigDataUrl}"></div>
         </div>
+       </div>
         <div class="ag-footbox">
           <div>Datum: ${escHtml(erstelltDatum)}<br>Datei: FO-07-06</div>
           <div>Rev 01</div>
@@ -216,6 +216,28 @@ if(!raw){
           <div>Freigabe: Skrandzuweit</div>
         </div>
       </div>`;
+    }
+
+    function fitPrintLayoutToPage(){
+      const page=document.querySelector('.ag-page');
+      if(!page)return;
+      const inner=page.querySelector('.ag-inner');
+      if(!inner)return;
+      inner.style.transform='none';
+      inner.style.width='100%';
+      const footbox=page.querySelector('.ag-footbox');
+      const footH=footbox?footbox.offsetHeight:0;
+      const mmToPx=page.clientHeight/297;
+      const topPad=15*mmToPx;
+      const bottomReserve=15*mmToPx+footH;
+      const available=page.clientHeight-topPad-bottomReserve;
+      const natural=inner.scrollHeight;
+      if(natural>available && available>0){
+        const scale=available/natural;
+        inner.style.transformOrigin='top left';
+        inner.style.width=(100/scale)+'%';
+        inner.style.transform='scale('+scale+')';
+      }
     }
 
     document.getElementById('btnSubmit').addEventListener('click',()=>{
@@ -237,7 +259,10 @@ if(!raw){
       document.getElementById('doneBox').style.display='block';
       const sigDataUrl=canvas.toDataURL('image/png');
       document.getElementById('printLayout').innerHTML=buildPrintLayout(datumEl.value,kennz.value.trim(),endpr.value==='ja',sigDataUrl);
-      window.print();
+      requestAnimationFrame(()=>{
+        fitPrintLayoutToPage();
+        window.print();
+      });
     });
   }
 }
