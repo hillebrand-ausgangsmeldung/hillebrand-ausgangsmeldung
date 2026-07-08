@@ -31,7 +31,7 @@
 
   /* Originales Ausgangsmeldung Formular FO-07-06, nur fuer den Druck */
   #printLayout{position:absolute;left:-99999px;top:0}
-  .ag-page{width:210mm;height:297mm;padding:15mm;margin:0 auto;background:#fff;position:relative;overflow:hidden}
+  .ag-page{width:210mm;height:277mm;padding:15mm;margin:0 auto;background:#fff;position:relative;overflow:hidden;page-break-after:avoid;break-after:avoid-page}
   .ag-inner{width:100%}
   .ag-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12mm}
   .ag-qm{font-size:13pt;line-height:1.6}
@@ -227,7 +227,7 @@ if(!raw){
       inner.style.width='100%';
       const footbox=page.querySelector('.ag-footbox');
       const footH=footbox?footbox.offsetHeight:0;
-      const mmToPx=page.clientHeight/297;
+      const mmToPx=page.clientHeight/277;
       const topPad=15*mmToPx;
       const bottomReserve=15*mmToPx+footH;
       const available=page.clientHeight-topPad-bottomReserve;
