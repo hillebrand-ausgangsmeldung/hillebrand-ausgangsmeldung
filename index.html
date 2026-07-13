@@ -122,6 +122,10 @@ if(!raw){
         <input type="text" id="fKennzeichen" placeholder="z. B. SI-AB 123">
       </div>
       <div class="field">
+        <label>Plombennummer</label>
+        <input type="text" id="fPlombe" placeholder="z. B. 987654" value="${escHtml(data.pl||'')}">
+      </div>
+      <div class="field">
         <label>Endpruefung durchgefuehrt</label>
         <div class="radiorow">
           <label><input type="radio" name="fEndpruefung" value="ja"> Ja</label>
@@ -179,7 +183,7 @@ if(!raw){
       canvas.dataset.signed='0';
     });
 
-    function buildPrintLayout(verladedatumISO,kennzeichen,endpruefungJa,sigDataUrl){
+    function buildPrintLayout(verladedatumISO,kennzeichen,plombe,endpruefungJa,sigDataUrl){
       const erstelltDatum=data.e||todayISO();
       const paletten=(data.p!=null)?data.p:'';
       return `
@@ -207,6 +211,7 @@ if(!raw){
           <div>Endpr&uuml;fung durchgef&uuml;hrt: ${endpruefungJa?'\u2612 ja \u2610 Nein':'\u2610 ja \u2612 Nein'}</div>
           <div>Warenversand erfolgt</div>
           <div>Best&auml;tigung Verlader (K&uuml;rzel):<br><img class="ag-signimg" src="${sigDataUrl}"></div>
+          <div>Plombennummer: ${escHtml(plombe)}</div>
         </div>
        </div>
         <div class="ag-footbox">
@@ -243,6 +248,7 @@ if(!raw){
     document.getElementById('btnSubmit').addEventListener('click',()=>{
       const datumEl=document.getElementById('fVerladedatum');
       const kennz=document.getElementById('fKennzeichen');
+      const plombeEl=document.getElementById('fPlombe');
       const endpr=document.querySelector('input[name="fEndpruefung"]:checked');
       const errBox=document.getElementById('errBox');
       const missing=[];
@@ -258,7 +264,7 @@ if(!raw){
       errBox.style.display='none';
       document.getElementById('doneBox').style.display='block';
       const sigDataUrl=canvas.toDataURL('image/png');
-      document.getElementById('printLayout').innerHTML=buildPrintLayout(datumEl.value,kennz.value.trim(),endpr.value==='ja',sigDataUrl);
+      document.getElementById('printLayout').innerHTML=buildPrintLayout(datumEl.value,kennz.value.trim(),plombeEl.value.trim(),endpr.value==='ja',sigDataUrl);
       requestAnimationFrame(()=>{
         fitPrintLayoutToPage();
         window.print();
