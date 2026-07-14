@@ -234,7 +234,8 @@ if(!raw){
       const footH=footbox?footbox.offsetHeight:0;
       const mmToPx=page.clientHeight/277;
       const topPad=15*mmToPx;
-      const bottomReserve=15*mmToPx+footH;
+      const footGap=6*mmToPx; // Abstand zwischen Plombennummer-Zeile und Fusszeile
+      const bottomReserve=15*mmToPx+footH+footGap;
       const available=page.clientHeight-topPad-bottomReserve;
       const natural=inner.scrollHeight;
       if(natural>available && available>0){
