@@ -256,7 +256,7 @@ function renderForm(data){
     });
 
     function buildPrintLayout(verladedatumISO,kennzeichen,plombe,endpruefungJa,sigDataUrl){
-      const erstelltDatum=data.e||todayISO();
+      const FUSSZEILE_DATUM='23.02.2024'; // festes Datum in der Fusszeile, unabhaengig vom Verladedatum
       const paletten=(data.p!=null)?data.p:'';
       return `
       <div class="ag-page">
@@ -287,7 +287,7 @@ function renderForm(data){
         </div>
        </div>
         <div class="ag-footbox">
-          <div>Datum: ${escHtml(erstelltDatum)}<br>Datei: FO-07-06</div>
+          <div>Datum: ${FUSSZEILE_DATUM}<br>Datei: FO-07-06</div>
           <div>Rev 01</div>
           <div>Seite: 1 von 1</div>
           <div>Freigabe: Skrandzuweit</div>
