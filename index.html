@@ -45,7 +45,8 @@
   .ag-weights{width:100%;border-collapse:collapse;margin-bottom:12mm;font-size:13pt}
   .ag-weights td{border:1px solid #000;padding:3mm 4mm;color:#000}
   .ag-num{text-align:right}
-  .ag-fields div{margin-bottom:9mm;font-size:13pt;color:#000}
+  .ag-fields{display:flex;flex-direction:column;gap:9mm}
+  .ag-fields div{margin:0;font-size:13pt;color:#000}
   .ag-signimg{display:block;height:20mm;margin-top:2mm}
   .ag-signline{display:inline-block;width:50mm;border-bottom:1px solid #000;margin-left:2mm}
   .ag-footbox{position:absolute;bottom:15mm;left:15mm;right:15mm;border:1px solid #000;display:flex;justify-content:space-between;padding:2mm 4mm;font-size:9pt;color:#000}
@@ -280,10 +281,10 @@ function renderForm(data){
         <div class="ag-fields">
           <div>Verladedatum: ${isoToDE(verladedatumISO)}</div>
           <div>Kennzeichen: ${escHtml(kennzeichen)}</div>
+          <div>Plombennummer: ${escHtml(plombe)}</div>
           <div>Endpr&uuml;fung durchgef&uuml;hrt: ${endpruefungJa?'\u2612 ja \u2610 Nein':'\u2610 ja \u2612 Nein'}</div>
           <div>Warenversand erfolgt</div>
           <div>Best&auml;tigung Verlader (K&uuml;rzel):<br><img class="ag-signimg" src="${sigDataUrl}"></div>
-          <div>Plombennummer: ${escHtml(plombe)}</div>
         </div>
        </div>
         <div class="ag-footbox">
@@ -306,7 +307,7 @@ function renderForm(data){
       const footH=footbox?footbox.offsetHeight:0;
       const mmToPx=page.clientHeight/277;
       const topPad=15*mmToPx;
-      const footGap=6*mmToPx; // Abstand zwischen Plombennummer-Zeile und Fusszeile
+      const footGap=6*mmToPx; // Abstand zwischen Bestaetigung-Verlader-Zeile und Fusszeile
       const bottomReserve=15*mmToPx+footH+footGap;
       const available=page.clientHeight-topPad-bottomReserve;
       const natural=inner.scrollHeight;
