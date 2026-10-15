@@ -653,16 +653,20 @@ function renderForm(data){
       // Kopfdaten
       const kunde=String(data.k||'');
       font('bold',14);
-      const kundeBreit=doc.getTextWidth(kunde)>(RX-VX-3);
+      const kundeW=doc.getTextWidth(kunde);
       font('normal',14);
+      // rechte Spalte rueckt hinter lange Kundennamen; erst wenn sie nicht mehr passt, steht alles untereinander
+      const RXk=Math.max(RX,VX+kundeW+6);
+      const rechtsBreit=Math.max(doc.getTextWidth(data.l?'Lieferschein-Nr.: '+data.l:''),doc.getTextWidth(data.f?'Farbmarkierung: '+data.f:''));
+      const kundeBreit=RXk+rechtsBreit>L+W;
       doc.text('Kunde:',TX,y);
       font('bold',14);
       doc.text(kunde,VX,y);
       font('normal',14);
       if(!kundeBreit){
-        if(data.l)doc.text('Lieferschein-Nr.: '+data.l,RX,y);
+        if(data.l)doc.text('Lieferschein-Nr.: '+data.l,RXk,y);
         y+=9;
-        if(data.f){doc.text('Farbmarkierung: '+data.f,RX,y);y+=9;}
+        if(data.f){doc.text('Farbmarkierung: '+data.f,RXk,y);y+=9;}
       }else{
         y+=9;
         const VX2=TX+doc.getTextWidth('Farbmarkierung:')+3;
@@ -670,8 +674,10 @@ function renderForm(data){
         if(data.f){doc.text('Farbmarkierung:',TX,y);doc.text(String(data.f),VX2,y);y+=9;}
       }
       doc.text('Legierung:',TX,y);
-      doc.text(String(data.m||''),VX,y);
-      doc.text('Blöcke',RX,y);
+      const legierung=String(data.m||'');
+      doc.text(legierung,VX,y);
+      // "Blöcke" steht in der rechten Spalte, rutscht aber hinter lange Legierungsnamen
+      doc.text('Blöcke',Math.max(RX,VX+doc.getTextWidth(legierung)+5),y);
       y+=9;
       doc.text('Chargen-Nr:',TX,y);
       const chargeText=sortedCharges.join(', ');
